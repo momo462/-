@@ -63,26 +63,26 @@ void test2()
 //3.判断一个数是不是2的n次方。
 bool func3(double num)
 {
-	//int count=0;
-	//if(num<1)
-	//{
-	//	num=1/num;
-	//}
-	//int temp=(int)num;
-	//while(temp)
-	//{
-	//	count++;
-	//	temp=temp&(temp-1);
-	//}
-	//if(count==1||count==0)
-	//{
-	//	return true;
-	//} 
-	//return false;
-	if(!(num&(num-1))) 
+	int count=0;
+	if(num<1)
+	{
+		num=1/num;
+	}
+	int temp=(int)num;
+	while(temp)
+	{
+		count++;
+		temp=temp&(temp-1);
+	}
+	if(count==1||count==0)
+	{
+		return true;
+	} 
+	return false;
+	/*if(!(num&(num-1))) 
 		return true;
 	else
-		return false;
+		return false;*/
 }
 
 void test3()
@@ -188,28 +188,17 @@ void func8(int a[],int size,int *ret1,int *ret2)
 	{
 		ret^=a[i];
 	}
-	int count=0;
-	while(ret)
-	{
-		if(ret&1==1)
-		{
-			break;
-		}
-		count++;
-		ret=ret>>1;
-	}
+	//得到第一个位为1的
+	int pos=ret&~(ret-1);
 	//进行分组并得到两个数
 	for(int i=0;i<size;i++)
 	{
-		if(a[i]>>(count)&1)
+		if(a[i]&pos)
 		{
 			*ret1^=a[i];
 		}
-		else
-		{
-			*ret2^=a[i];
-		}
 	}
+	*ret2=ret^*ret1;
 }
 void test8()
 {
@@ -218,4 +207,57 @@ void test8()
 	int ret2=0;
 	func8(a,10,&ret1,&ret2);
 	cout<<ret1<<" "<<ret2<<endl;
+}
+//9.给一组数，只有三个个数只出现了一次，其他所有数都是成对出现的。
+//  怎么找出这三个数
+int findonebit(int num)
+{
+	return num&~(num-1);
+}
+void func9(int a[],int size,int *ret1,int *ret2,int *ret3)
+{
+	//1、求出那两个数的异或结果，确定有几个位是不同的，按照其中一位进行分组
+	int xor=0;
+	for(int i=0;i<size;i++)
+	{
+		xor^=a[i];
+	}
+	//xor=a^b^c
+	//a^xor=b^c;b^xor=a^c;c^xor=a^b;
+	//(a^xor)^(b^xor)^(c^xor)=0
+	//所以一定是有某些位上任意两个是相同的，一个是不同的，且不同的那个为0 011 101 110
+	//进行分组并得到两个数
+	int bit=0;
+	for(int i=0;i<size;i++)
+	{
+		//xor^a=A xor^b=B xor^c=C
+		bit^=findonebit(xor^a[i]);
+	}
+	//最低为为1的那位---一定是a，b，c中的一个
+	bit=findonebit(bit);
+	for(int i=0;i<size;i++)
+	{
+		if(findonebit(xor^a[i])==bit)
+		{
+			*ret1^=a[i];
+		}
+	}
+	for(int i=0;i<size;i++)
+	{
+		if(*ret1==a[i])
+		{
+			swap(a[size-1],*ret1);
+		}
+	}
+	func8(a,size-1,ret2,ret3);
+	
+}
+void test9()
+{
+	int a[11]={1,2,4,5,4,2,1,3,3,6,7};
+	int ret1=0;
+	int ret2=0;
+	int ret3=0;
+	func9(a,11,&ret1,&ret2,&ret3);
+	cout<<ret1<<" "<<ret2<<" "<<ret3<<endl;
 }
